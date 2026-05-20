@@ -1,3 +1,40 @@
+// ── Theme toggle (all pages) ─────────────────────────────────────────────────
+
+(function () {
+  const STORAGE_KEY = 'taint-theme';
+  const root        = document.documentElement;
+  const saved       = localStorage.getItem(STORAGE_KEY) || 'dark';
+
+  // Apply saved theme immediately to avoid flash
+  root.setAttribute('data-theme', saved);
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const btn   = document.getElementById('themeToggle');
+    const icon  = btn.querySelector('.theme-toggle-icon');
+    const label = btn.querySelector('.theme-toggle-label');
+
+    function applyTheme(theme) {
+      root.setAttribute('data-theme', theme);
+      localStorage.setItem(STORAGE_KEY, theme);
+      if (theme === 'dark') {
+        icon.textContent  = '☀';
+        label.textContent = 'Light';
+      } else {
+        icon.textContent  = '🌙';
+        label.textContent = 'Dark';
+      }
+    }
+
+    // Sync button label to current theme on load
+    applyTheme(saved);
+
+    btn.addEventListener('click', () => {
+      const current = root.getAttribute('data-theme');
+      applyTheme(current === 'dark' ? 'light' : 'dark');
+    });
+  });
+})();
+
 // ── Core math (shared) ───────────────────────────────────────────────────────
 
 const COMPACT_DIGITS = '0123456789ABCDEFGHIJ';
@@ -7,12 +44,12 @@ function parseCompact(str) {
   if (!str) return null;
   const parts = str.split('.');
   if (parts.length > 2) return null;
-  const intPart = parts[0];
+  const intPart  = parts[0];
   const fracPart = parts[1] || '';
   if (!/^[0-9A-J]*$/.test(intPart) || !/^[0-9A-J]*$/.test(fracPart)) return null;
   if (intPart === '' && fracPart === '') return null;
   let val = 0;
-  for (let i = 0; i < intPart.length; i++) val = val * 20 + COMPACT_DIGITS.indexOf(intPart[i]);
+  for (let i = 0; i < intPart.length; i++)  val = val * 20 + COMPACT_DIGITS.indexOf(intPart[i]);
   for (let i = 0; i < fracPart.length; i++) val += COMPACT_DIGITS.indexOf(fracPart[i]) / Math.pow(20, i + 1);
   return val;
 }
@@ -25,7 +62,7 @@ function parseCsv(str) {
   function parseGroups(side) {
     if (!side) return [];
     const groups = side.split(',');
-    const nums = [];
+    const nums   = [];
     for (const g of groups) {
       const n = parseInt(g.trim(), 10);
       if (isNaN(n) || n < 0 || n > 19) return null;
@@ -33,13 +70,13 @@ function parseCsv(str) {
     }
     return nums;
   }
-  const intGroups = parseGroups(sides[0]);
+  const intGroups  = parseGroups(sides[0]);
   if (intGroups === null) return null;
   const fracGroups = sides.length === 2 ? parseGroups(sides[1]) : [];
   if (fracGroups === null) return null;
   if (intGroups.length === 0 && fracGroups.length === 0) return null;
   let val = 0;
-  for (let i = 0; i < intGroups.length; i++) val = val * 20 + intGroups[i];
+  for (let i = 0; i < intGroups.length; i++)  val = val * 20 + intGroups[i];
   for (let i = 0; i < fracGroups.length; i++) val += fracGroups[i] / Math.pow(20, i + 1);
   return val;
 }
@@ -50,7 +87,7 @@ function parseB20(str, notation) {
 
 function toCompact(val, dp) {
   if (val < 0) return '-' + toCompact(-val, dp);
-  const intVal = Math.floor(val);
+  const intVal  = Math.floor(val);
   const fracVal = val - intVal;
   let intStr = '';
   if (intVal === 0) { intStr = '0'; }
@@ -65,7 +102,7 @@ function toCompact(val, dp) {
 
 function toCsv(val, dp) {
   if (val < 0) return '-' + toCsv(-val, dp);
-  const intVal = Math.floor(val);
+  const intVal  = Math.floor(val);
   const fracVal = val - intVal;
   let intGroups = [];
   if (intVal === 0) { intGroups = [0]; }
@@ -142,7 +179,6 @@ if (document.getElementById('b20in')) {
   b20in.addEventListener('input', () => { activeField = 'b20'; convertFromB20(); });
   b10in.addEventListener('input', () => { activeField = 'b10'; convertFromB10(); });
   dpSel.addEventListener('change', () => activeField === 'b20' ? convertFromB20() : convertFromB10());
-
   notationSel.addEventListener('change', () => {
     b20in.placeholder = notationSel.value === 'compact'
       ? 'e.g. 2D8 or 2D8.A3'
@@ -171,18 +207,18 @@ if (document.getElementById('b20in')) {
 // ── Averager (averager.html only) ────────────────────────────────────────────
 
 if (document.getElementById('motherIn')) {
-  const motherIn   = document.getElementById('motherIn');
-  const fatherIn   = document.getElementById('fatherIn');
+  const motherIn  = document.getElementById('motherIn');
+  const fatherIn  = document.getElementById('fatherIn');
   const motherHint = document.getElementById('motherHint');
   const fatherHint = document.getElementById('fatherHint');
-  const avgDpSel   = document.getElementById('avgDp');
-  const avgNotSel  = document.getElementById('avgNotation');
-  const childInline   = document.getElementById('childInline');
-  const childCompact  = document.getElementById('childCompact');
-  const childCsv      = document.getElementById('childCsv');
-  const childDec      = document.getElementById('childDec');
-  const motherDec10   = document.getElementById('motherDec10');
-  const fatherDec10   = document.getElementById('fatherDec10');
+  const avgDpSel  = document.getElementById('avgDp');
+  const avgNotSel = document.getElementById('avgNotation');
+  const childInline  = document.getElementById('childInline');
+  const childCompact = document.getElementById('childCompact');
+  const childCsv     = document.getElementById('childCsv');
+  const childDec     = document.getElementById('childDec');
+  const motherDec10  = document.getElementById('motherDec10');
+  const fatherDec10  = document.getElementById('fatherDec10');
 
   function validateParent(inputEl, hintEl, notation) {
     const str = inputEl.value.trim();
@@ -225,7 +261,6 @@ if (document.getElementById('motherIn')) {
   motherIn.addEventListener('input', computeAverage);
   fatherIn.addEventListener('input', computeAverage);
   avgDpSel.addEventListener('change', computeAverage);
-
   avgNotSel.addEventListener('change', () => {
     const ph = avgNotSel.value === 'compact' ? 'e.g. 2D8' : 'e.g. 2,13,8';
     motherIn.placeholder = ph;

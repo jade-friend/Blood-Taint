@@ -1,14 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ancestral Average – Blood Taint Calculator</title>
+<title>Ancestral Average – Taint Calculator</title>
 <link rel="stylesheet" href="assets/style.css">
+<script src="assets/script.js" defer></script>
 </head>
 <body>
 
 <header>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+    <span class="theme-toggle-icon">☀</span>
+    <span class="theme-toggle-label">Light</span>
+  </button>
   <div class="title-eyebrow">Vigesimal Arithmetic Engine</div>
   <h1>TAINT CALCULATOR</h1>
   <div class="subtitle">BASE&nbsp;20&nbsp;·&nbsp;CONVERSION&nbsp;&amp;&nbsp;AVERAGING</div>
@@ -31,19 +36,10 @@
             <option value="0">0</option>
             <option value="1">1</option>
             <option value="2">2</option>
-            <option value="3">3</option>
+            <option value="3" selected>3</option>
             <option value="4">4</option>
             <option value="5">5</option>
             <option value="6">6</option>
-            <option value="7">7</option>
-            <option value="8">8</option>
-            <option value="9">9</option>            
-            <option value="10" selected>10</option>
-            <option value="11">11</option>
-            <option value="12">12</option>            
-            <option value="13">13</option>
-            <option value="14">14</option>
-            <option value="15">15</option>
           </select>
         </div>
         <div class="field-col">
@@ -109,8 +105,7 @@
 
 </main>
 
-<footer>BLOOD TAINT CALCULATOR &nbsp;·&nbsp; VIGESIMAL ENGINE &nbsp;·&nbsp; BASE&nbsp;20</footer>
+<footer>TAINT CALCULATOR &nbsp;·&nbsp; VIGESIMAL ENGINE &nbsp;·&nbsp; BASE&nbsp;20</footer>
 
-<script src="assets/script.js" defer></script>
 </body>
 </html>
