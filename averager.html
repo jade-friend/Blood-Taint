@@ -3,14 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ancestral Average – Blood Taint Calculator</title>
+<title>Blood Calculus - Blood Taint Calculator</title>
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
 
 <header>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+    <span class="theme-toggle-icon">☀</span>
+    <span class="theme-toggle-label">Light</span>
+  </button>
   <div class="title-eyebrow">Vigesimal Arithmetic Engine</div>
-  <h1>TAINT CALCULATOR</h1>
+  <h1>BLOOD TAINT CALCULATOR</h1>
   <div class="subtitle">BASE&nbsp;20&nbsp;·&nbsp;CONVERSION&nbsp;&amp;&nbsp;AVERAGING</div>
 </header>
 
@@ -38,12 +42,12 @@
             <option value="7">7</option>
             <option value="8">8</option>
             <option value="9">9</option>            
-            <option value="10" selected>10</option>
+            <option value="10">10</option>
             <option value="11">11</option>
             <option value="12">12</option>            
             <option value="13">13</option>
             <option value="14">14</option>
-            <option value="15">15</option>
+            <option value="15" selected>15</option>
           </select>
         </div>
         <div class="field-col">
@@ -71,7 +75,7 @@
         <div class="field-col">
           <div class="parent-label child-label">CHILD</div>
           <div class="result-box" style="padding:10px 12px; min-height:48px;">
-            <div class="result-value" id="childInline" style="font-size:22px;">—</div>
+            <div class="result-value" id="childInline" style="font-size:22px;">-</div>
           </div>
         </div>
       </div>
@@ -80,24 +84,24 @@
 
       <div class="result-grid">
         <div class="result-box">
-          <div class="result-label">Child – Compact</div>
-          <div class="result-value" id="childCompact">—</div>
+          <div class="result-label">Child - Compact</div>
+          <div class="result-value" id="childCompact">-</div>
         </div>
         <div class="result-box">
-          <div class="result-label">Child – CSV</div>
-          <div class="result-value" id="childCsv">—</div>
+          <div class="result-label">Child - CSV</div>
+          <div class="result-value" id="childCsv">-</div>
         </div>
       </div>
       <div style="margin-top:12px;">
         <div class="result-box">
           <div class="result-label">Child – Base 10</div>
-          <div class="result-value" id="childDec">—</div>
+          <div class="result-value" id="childDec">-</div>
         </div>
       </div>
       <div style="margin-top:12px; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
         <div class="result-box">
           <div class="result-label">Mother – Base 10</div>
-          <div class="result-value" style="font-size:18px;" id="motherDec10">—</div>
+          <div class="result-value" style="font-size:18px;" id="motherDec10">-</div>
         </div>
         <div class="result-box">
           <div class="result-label">Father – Base 10</div>
