@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blood Shadow – Taint Calculator</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/script.js" defer></script>
+</head>
+<body>
+
+<header>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+    <span class="theme-toggle-icon">☀</span>
+    <span class="theme-toggle-label">Light</span>
+  </button>
+  <div class="title-eyebrow">Vigesimal Arithmetic Engine</div>
+  <h1>TAINT CALCULATOR</h1>
+  <div class="subtitle">BASE&nbsp;20&nbsp;·&nbsp;CONVERSION&nbsp;&amp;&nbsp;AVERAGING</div>
+</header>
+
+<main>
+
+  <a href="index.html" class="back-btn">← Back</a>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-num">III</span>
+      <span class="card-title">Blood Shadow</span>
+    </div>
+    <div class="card-body">
+
+      <div class="options-row">
+        <div class="field-col">
+          <label>Decimal Places</label>
+          <select id="shadowDp">
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>            
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>            
+            <option value="13">13</option>
+            <option value="14">14</option>
+            <option value="15" selected>15</option>
+          </select>
+        </div>
+        <div class="field-col">
+          <label>Input Notation (Base-20)</label>
+          <select id="shadowNotation">
+            <option value="compact">Compact (2D8)</option>
+            <option value="csv">CSV (2,13,8)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="shadow-grid">
+        <div class="field-col">
+          <label>Taint Value</label>
+          <input type="text" id="taintIn" placeholder="e.g. 2D8" autocomplete="off" spellcheck="false">
+          <div class="hint" id="taintHint"></div>
+        </div>
+
+        <div class="shadow-op" aria-hidden="true">
+          <span class="shadow-op-sym">×20</span>
+          <span class="shadow-op-rule"></span>
+        </div>
+
+        <div class="field-col">
+          <label>Base 10 (Taint)</label>
+          <input type="text" id="taintB10" placeholder="e.g. 1068" autocomplete="off" spellcheck="false">
+          <div class="hint" id="taintB10Hint"></div>
+        </div>
+      </div>
+
+      <div class="shadow-result-block">
+        <div class="shadow-result-heading">
+          <span class="shadow-result-label">BLOOD SHADOW</span>
+          <span class="shadow-result-formula">= taint × 20</span>
+        </div>
+        <div class="result-grid">
+          <div class="result-box result-box--highlight">
+            <div class="result-label">Compact</div>
+            <div class="result-value" id="shadowCompact">—</div>
+          </div>
+          <div class="result-box result-box--highlight">
+            <div class="result-label">CSV</div>
+            <div class="result-value" id="shadowCsv">—</div>
+          </div>
+        </div>
+        <div style="margin-top:12px;">
+          <div class="result-box result-box--highlight">
+            <div class="result-label">Base 10</div>
+            <div class="result-value" id="shadowDec">—</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<footer>TAINT CALCULATOR &nbsp;·&nbsp; VIGESIMAL ENGINE &nbsp;·&nbsp; BASE&nbsp;20</footer>
+
+</body>
+</html>
