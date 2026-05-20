@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taint Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Cinzel:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0a0a0b;
+    --panel:     #0f0f12;
+    --border:    #2a2a35;
+    --amber:     #e8a020;
+    --amber-dim: #7a4e08;
+    --amber-glow:#ffd060;
+    --red:       #c03030;
+    --green:     #2a8a40;
+    --text:      #c8b88a;
+    --text-dim:  #5a5040;
+    --white:     #f0e8d8;
+    --inset:     #070709;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(ellipse 80% 40% at 50% -10%, rgba(232,160,32,0.07) 0%, transparent 70%),
+      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(42,42,53,0.3) 39px, rgba(42,42,53,0.3) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(42,42,53,0.15) 39px, rgba(42,42,53,0.15) 40px);
+  }
+  header {
+    text-align: center;
+    padding: 48px 24px 32px;
+    position: relative;
+  }
+  header::after {
+    content: '';
+    display: block;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--amber-dim), var(--amber), var(--amber-dim), transparent);
+    margin-top: 32px;
+  }
+  .title-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.35em;
+    color: var(--amber-dim);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  h1 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(36px, 7vw, 72px);
+    font-weight: 900;
+    color: var(--amber-glow);
+    letter-spacing: 0.06em;
+    text-shadow: 0 0 40px rgba(232,160,32,0.35), 0 0 80px rgba(232,160,32,0.12);
+    line-height: 1;
+  }
+  .subtitle {
+    margin-top: 12px;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+  }
+  main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+  .legend {
+    border: 1px solid var(--border);
+    background: var(--panel);
+    padding: 16px 20px;
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+    font-size: 13px;
+  }
+  .legend-title {
+    width: 100%;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--amber-dim);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 10px; }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    border: 1px solid;
+    white-space: nowrap;
+  }
+  .badge-compact { border-color: var(--amber); color: var(--amber-glow); background: rgba(232,160,32,0.07); }
+  .badge-csv    { border-color: #4a8ab0; color: #80c0e0; background: rgba(74,138,176,0.07); }
+  .legend-desc { color: var(--text-dim); font-size: 12px; }
+  .card {
+    border: 1px solid var(--border);
+    background: var(--panel);
+    position: relative;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, var(--amber-dim) 20%, var(--amber) 50%, var(--amber-dim) 80%, transparent 100%);
+  }
+  .card-header {
+    padding: 16px 24px 0;
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+  }
+  .card-num {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    color: var(--amber-dim);
+    letter-spacing: 0.2em;
+  }
+  .card-title {
+    font-family: 'Cinzel', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--amber-glow);
+    letter-spacing: 0.08em;
+  }
+  .card-body { padding: 20px 24px 28px; }
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 12px;
+    align-items: end;
+    margin-bottom: 16px;
+  }
+  .field-col { display: flex; flex-direction: column; gap: 6px; }
+  label {
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--amber-dim);
+    text-transform: uppercase;
+  }
+  input[type="text"], input[type="number"], select {
+    background: var(--inset);
+    border: 1px solid var(--border);
+    color: var(--white);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 18px;
+    padding: 10px 12px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    -webkit-appearance: none;
+    border-radius: 0;
+  }
+  input:focus, select:focus {
+    border-color: var(--amber);
+    box-shadow: 0 0 0 2px rgba(232,160,32,0.12), inset 0 0 12px rgba(232,160,32,0.04);
+  }
+  input.error { border-color: var(--red) !important; }
+  input.valid { border-color: var(--green) !important; }
+  select { font-size: 14px; cursor: pointer; }
+  select option { background: #1a1a20; }
+  .arrow-btn {
+    background: none;
+    border: 1px solid var(--amber-dim);
+    color: var(--amber);
+    font-size: 20px;
+    width: 44px;
+    height: 44px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: monospace;
+    flex-shrink: 0;
+  }
+  .arrow-btn:hover {
+    border-color: var(--amber-glow);
+    color: var(--amber-glow);
+    box-shadow: 0 0 12px rgba(232,160,32,0.2);
+  }
+  .arrow-btn:active { transform: scale(0.95); }
+  .options-row {
+    display: flex;
+    gap: 16px;
+    align-items: end;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .options-row .field-col { min-width: 140px; flex: 1; }
+  .result-box {
+    background: var(--inset);
+    border: 1px solid var(--border);
+    padding: 16px 20px;
+    min-height: 64px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .result-label {
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+  .result-value {
+    font-size: 28px;
+    color: var(--amber-glow);
+    letter-spacing: 0.05em;
+    text-shadow: 0 0 16px rgba(232,160,32,0.3);
+    min-height: 36px;
+    word-break: break-all;
+  }
+  .result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 24px 0;
+  }
+  .trio-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto 1fr;
+    gap: 10px;
+    align-items: end;
+  }
+  .trio-eq {
+    font-size: 22px;
+    color: var(--amber-dim);
+    padding-bottom: 10px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .parent-label {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    color: var(--amber);
+    letter-spacing: 0.2em;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  .hint {
+    font-size: 11px;
+    color: var(--red);
+    min-height: 16px;
+    letter-spacing: 0.05em;
+    margin-top: 4px;
+  }
+  .hint.ok { color: var(--green); }
+  footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+    border-top: 1px solid var(--border);
+  }
+  body::after {
+    content: '';
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 3px, rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 4px);
+    z-index: 9999;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  header  { animation: fadeUp 0.5s ease both; }
+  .legend { animation: fadeUp 0.5s ease 0.1s both; }
+  .card:nth-of-type(1) { animation: fadeUp 0.5s ease 0.2s both; }
+  .card:nth-of-type(2) { animation: fadeUp 0.5s ease 0.3s both; }
+  @media (max-width: 600px) {
+    .field-row { grid-template-columns: 1fr; }
+    .arrow-btn { transform: rotate(90deg); width: 36px; height: 36px; margin: 0 auto; }
+    .trio-grid { grid-template-columns: 1fr; }
+    .trio-eq { display: none; }
+    .result-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-eyebrow">Vigesimal Arithmetic Engine</div>
+  <h1>TAINT CALCULATOR</h1>
+  <div class="subtitle">BASE&nbsp;20&nbsp;·&nbsp;CONVERSION&nbsp;&amp;&nbsp;AVERAGING</div>
+</header>
+
+<main>
+
+  <div class="legend">
+    <div class="legend-title">Notation Systems</div>
+    <div class="legend-item">
+      <span class="badge badge-compact">COMPACT</span>
+      <span class="legend-desc">Digits 0–9 then A=10 B=11 C=12 D=13 E=14 F=15 G=16 H=17 I=18 J=19 &nbsp;→&nbsp; 1068&nbsp;=&nbsp;<strong style="color:var(--amber-glow)">2D8</strong></span>
+    </div>
+    <div class="legend-item">
+      <span class="badge badge-csv">CSV</span>
+      <span class="legend-desc">Comma-separated decimal groups (0–19 each) &nbsp;→&nbsp; 1068&nbsp;=&nbsp;<strong style="color:#80c0e0">2,13,8</strong></span>
+    </div>
+  </div>
+
+  <!-- Card I: Converter -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-num">I</span>
+      <span class="card-title">Base Converter</span>
+    </div>
+    <div class="card-body">
+      <div class="options-row">
+        <div class="field-col">
+          <label>Decimal Places</label>
+          <select id="dp">
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3" selected>3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="8">8</option>
+            <option value="10">10</option>
+          </select>
+        </div>
+        <div class="field-col">
+          <label>Base-20 Input Format</label>
+          <select id="inputNotation">
+            <option value="compact">Compact (2D8)</option>
+            <option value="csv">CSV (2,13,8)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field-col">
+          <label>Base 20</label>
+          <input type="text" id="b20in" placeholder="e.g. 2D8 or 2D8.A3" autocomplete="off" spellcheck="false">
+          <div class="hint" id="b20hint"></div>
+        </div>
+        <button class="arrow-btn" id="swapBtn" title="Swap">&#8644;</button>
+        <div class="field-col">
+          <label>Base 10</label>
+          <input type="text" id="b10in" placeholder="e.g. 1068 or 0.65" autocomplete="off" spellcheck="false">
+          <div class="hint" id="b10hint"></div>
+        </div>
+      </div>
+
+      <div class="result-grid">
+        <div class="result-box">
+          <div class="result-label">Compact notation</div>
+          <div class="result-value" id="outCompact">—</div>
+        </div>
+        <div class="result-box">
+          <div class="result-label">CSV notation</div>
+          <div class="result-value" id="outCsv">—</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;">
+        <div class="result-box">
+          <div class="result-label">Base 10 (decimal)</div>
+          <div class="result-value" id="outDec">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card II: Averager -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-num">II</span>
+      <span class="card-title">Ancestral Average</span>
+    </div>
+    <div class="card-body">
+      <div class="options-row">
+        <div class="field-col">
+          <label>Decimal Places</label>
+          <select id="avgDp">
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3" selected>3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+          </select>
+        </div>
+        <div class="field-col">
+          <label>Base-20 Input Format</label>
+          <select id="avgNotation">
+            <option value="compact">Compact (2D8)</option>
+            <option value="csv">CSV (2,13,8)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="trio-grid">
+        <div class="field-col">
+          <div class="parent-label">MOTHER</div>
+          <input type="text" id="motherIn" placeholder="e.g. 2D8" autocomplete="off" spellcheck="false">
+          <div class="hint" id="motherHint"></div>
+        </div>
+        <div class="trio-eq">+</div>
+        <div class="field-col">
+          <div class="parent-label">FATHER</div>
+          <input type="text" id="fatherIn" placeholder="e.g. 1J4" autocomplete="off" spellcheck="false">
+          <div class="hint" id="fatherHint"></div>
+        </div>
+        <div class="trio-eq">÷2&nbsp;=</div>
+        <div class="field-col">
+          <div class="parent-label" style="color:var(--amber-glow)">CHILD</div>
+          <div class="result-box" style="padding:10px 12px; min-height:48px;">
+            <div class="result-value" id="childInline" style="font-size:22px;">—</div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="section-divider">
+
+      <div class="result-grid">
+        <div class="result-box">
+          <div class="result-label">Child – Compact</div>
+          <div class="result-value" id="childCompact">—</div>
+        </div>
+        <div class="result-box">
+          <div class="result-label">Child – CSV</div>
+          <div class="result-value" id="childCsv">—</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;">
+        <div class="result-box">
+          <div class="result-label">Child – Base 10</div>
+          <div class="result-value" id="childDec">—</div>
+        </div>
+      </div>
+      <div style="margin-top:12px; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div class="result-box">
+          <div class="result-label">Mother – Base 10</div>
+          <div class="result-value" style="font-size:18px;" id="motherDec10">—</div>
+        </div>
+        <div class="result-box">
+          <div class="result-label">Father – Base 10</div>
+          <div class="result-value" style="font-size:18px;" id="fatherDec10">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>TAINT CALCULATOR &nbsp;·&nbsp; VIGESIMAL ENGINE &nbsp;·&nbsp; BASE&nbsp;20</footer>
+
+<script>
+const COMPACT_DIGITS = '0123456789ABCDEFGHIJ';
+
+function parseCompact(str) {
+  str = str.trim().toUpperCase();
+  if (!str) return null;
+  const parts = str.split('.');
+  if (parts.length > 2) return null;
+  const intPart = parts[0];
+  const fracPart = parts[1] || '';
+  if (!/^[0-9A-J]*$/.test(intPart) || !/^[0-9A-J]*$/.test(fracPart)) return null;
+  if (intPart === '' && fracPart === '') return null;
+  let val = 0;
+  for (let i = 0; i < intPart.length; i++) val = val * 20 + COMPACT_DIGITS.indexOf(intPart[i]);
+  for (let i = 0; i < fracPart.length; i++) val += COMPACT_DIGITS.indexOf(fracPart[i]) / Math.pow(20, i + 1);
+  return val;
+}
+
+function parseCsv(str) {
+  str = str.trim();
+  if (!str) return null;
+  const sides = str.split('.');
+  if (sides.length > 2) return null;
+  function parseGroups(side) {
+    if (!side) return [];
+    const groups = side.split(',');
+    const nums = [];
+    for (const g of groups) {
+      const n = parseInt(g.trim(), 10);
+      if (isNaN(n) || n < 0 || n > 19) return null;
+      nums.push(n);
+    }
+    return nums;
+  }
+  const intGroups = parseGroups(sides[0]);
+  if (intGroups === null) return null;
+  const fracGroups = sides.length === 2 ? parseGroups(sides[1]) : [];
+  if (fracGroups === null) return null;
+  if (intGroups.length === 0 && fracGroups.length === 0) return null;
+  let val = 0;
+  for (let i = 0; i < intGroups.length; i++) val = val * 20 + intGroups[i];
+  for (let i = 0; i < fracGroups.length; i++) val += fracGroups[i] / Math.pow(20, i + 1);
+  return val;
+}
+
+function parseB20(str, notation) {
+  return notation === 'compact' ? parseCompact(str) : parseCsv(str);
+}
+
+function toCompact(val, dp) {
+  if (val < 0) return '-' + toCompact(-val, dp);
+  const intVal = Math.floor(val);
+  const fracVal = val - intVal;
+  let intStr = '';
+  if (intVal === 0) { intStr = '0'; }
+  else { let n = intVal; while (n > 0) { intStr = COMPACT_DIGITS[n % 20] + intStr; n = Math.floor(n / 20); } }
+  if (dp === 0) return intStr;
+  let fracStr = '';
+  let f = fracVal;
+  for (let i = 0; i < dp; i++) { f *= 20; const d = Math.floor(f + 1e-12); fracStr += COMPACT_DIGITS[Math.min(d, 19)]; f -= d; }
+  fracStr = fracStr.replace(/0+$/, '');
+  return fracStr ? intStr + '.' + fracStr : intStr;
+}
+
+function toCsv(val, dp) {
+  if (val < 0) return '-' + toCsv(-val, dp);
+  const intVal = Math.floor(val);
+  const fracVal = val - intVal;
+  let intGroups = [];
+  if (intVal === 0) { intGroups = [0]; }
+  else { let n = intVal; while (n > 0) { intGroups.unshift(n % 20); n = Math.floor(n / 20); } }
+  const intStr = intGroups.join(',');
+  if (dp === 0) return intStr;
+  let fracGroups = [];
+  let f = fracVal;
+  for (let i = 0; i < dp; i++) { f *= 20; const d = Math.floor(f + 1e-12); fracGroups.push(Math.min(d, 19)); f -= d; }
+  while (fracGroups.length && fracGroups[fracGroups.length - 1] === 0) fracGroups.pop();
+  return fracGroups.length ? intStr + '.' + fracGroups.join(',') : intStr;
+}
+
+// ── Converter ──
+const b20in = document.getElementById('b20in');
+const b10in = document.getElementById('b10in');
+const b20hint = document.getElementById('b20hint');
+const b10hint = document.getElementById('b10hint');
+const outCompact = document.getElementById('outCompact');
+const outCsv = document.getElementById('outCsv');
+const outDec = document.getElementById('outDec');
+const dpSel = document.getElementById('dp');
+const notationSel = document.getElementById('inputNotation');
+const swapBtn = document.getElementById('swapBtn');
+let activeField = 'b20';
+
+function clearConv() { outCompact.textContent = '—'; outCsv.textContent = '—'; outDec.textContent = '—'; }
+
+function convertFromB20() {
+  const str = b20in.value.trim();
+  const notation = notationSel.value;
+  if (!str) { clearConv(); b20hint.textContent = ''; b20in.className = ''; return; }
+  const val = parseB20(str, notation);
+  if (val === null) {
+    b20hint.textContent = notation === 'compact'
+      ? 'Use digits 0–9 and A–J (e.g. 2D8 or 2D8.A3)'
+      : 'Comma-separated 0–19 groups (e.g. 2,13,8 or 2,13,8.5,3)';
+    b20hint.className = 'hint';
+    b20in.className = 'error';
+    clearConv(); return;
+  }
+  b20hint.textContent = ''; b20in.className = 'valid';
+  b10in.value = ''; b10hint.textContent = ''; b10in.className = '';
+  const dp = parseInt(dpSel.value, 10);
+  outCompact.textContent = toCompact(val, dp);
+  outCsv.textContent = toCsv(val, dp);
+  outDec.textContent = val.toFixed(dp);
+}
+
+function convertFromB10() {
+  const str = b10in.value.trim();
+  if (!str) { clearConv(); b10hint.textContent = ''; b10in.className = ''; return; }
+  const val = parseFloat(str);
+  if (isNaN(val)) {
+    b10hint.textContent = 'Invalid decimal number'; b10hint.className = 'hint';
+    b10in.className = 'error'; clearConv(); return;
+  }
+  b10hint.textContent = ''; b10in.className = 'valid';
+  b20in.value = ''; b20hint.textContent = ''; b20in.className = '';
+  const dp = parseInt(dpSel.value, 10);
+  outCompact.textContent = toCompact(val, dp);
+  outCsv.textContent = toCsv(val, dp);
+  outDec.textContent = val.toFixed(dp);
+}
+
+b20in.addEventListener('input', () => { activeField = 'b20'; convertFromB20(); });
+b10in.addEventListener('input', () => { activeField = 'b10'; convertFromB10(); });
+dpSel.addEventListener('change', () => activeField === 'b20' ? convertFromB20() : convertFromB10());
+notationSel.addEventListener('change', () => {
+  b20in.placeholder = notationSel.value === 'compact' ? 'e.g. 2D8 or 2D8.A3' : 'e.g. 2,13,8 or 2,13,8.5,3';
+  if (activeField === 'b20') convertFromB20();
+});
+
+swapBtn.addEventListener('click', () => {
+  const dec = outDec.textContent;
+  if (dec === '—' || dec === '') return;
+  if (activeField === 'b20') {
+    b10in.value = dec; b20in.value = '';
+    b20in.className = ''; b20hint.textContent = '';
+    activeField = 'b10'; convertFromB10();
+  } else {
+    const c = outCompact.textContent;
+    if (c === '—') return;
+    b20in.value = c; b10in.value = '';
+    b10in.className = ''; b10hint.textContent = '';
+    notationSel.value = 'compact';
+    activeField = 'b20'; convertFromB20();
+  }
+});
+
+// ── Averager ──
+const motherIn = document.getElementById('motherIn');
+const fatherIn = document.getElementById('fatherIn');
+const motherHint = document.getElementById('motherHint');
+const fatherHint = document.getElementById('fatherHint');
+const avgDpSel = document.getElementById('avgDp');
+const avgNotSel = document.getElementById('avgNotation');
+const childInline = document.getElementById('childInline');
+const childCompact = document.getElementById('childCompact');
+const childCsv = document.getElementById('childCsv');
+const childDec = document.getElementById('childDec');
+const motherDec10 = document.getElementById('motherDec10');
+const fatherDec10 = document.getElementById('fatherDec10');
+
+function clearAvg() {
+  childInline.textContent = '—'; childCompact.textContent = '—';
+  childCsv.textContent = '—'; childDec.textContent = '—';
+  motherDec10.textContent = '—'; fatherDec10.textContent = '—';
+}
+
+function validateParent(inputEl, hintEl, notation) {
+  const str = inputEl.value.trim();
+  if (!str) { hintEl.textContent = ''; inputEl.className = ''; return null; }
+  const val = parseB20(str, notation);
+  if (val === null) { hintEl.textContent = 'Invalid input'; hintEl.className = 'hint'; inputEl.className = 'error'; return null; }
+  hintEl.textContent = ''; inputEl.className = 'valid';
+  return val;
+}
+
+function computeAverage() {
+  const notation = avgNotSel.value;
+  const dp = parseInt(avgDpSel.value, 10);
+  const m = validateParent(motherIn, motherHint, notation);
+  const f = validateParent(fatherIn, fatherHint, notation);
+  if (m !== null) motherDec10.textContent = m.toFixed(dp);
+  if (f !== null) fatherDec10.textContent = f.toFixed(dp);
+  if (m === null || f === null) { childInline.textContent = '—'; childCompact.textContent = '—'; childCsv.textContent = '—'; childDec.textContent = '—'; return; }
+  const avg = (m + f) / 2;
+  const comp = toCompact(avg, dp);
+  childInline.textContent = comp;
+  childCompact.textContent = comp;
+  childCsv.textContent = toCsv(avg, dp);
+  childDec.textContent = avg.toFixed(dp);
+}
+
+motherIn.addEventListener('input', computeAverage);
+fatherIn.addEventListener('input', computeAverage);
+avgDpSel.addEventListener('change', computeAverage);
+avgNotSel.addEventListener('change', () => {
+  const ph = avgNotSel.value === 'compact' ? 'e.g. 2D8' : 'e.g. 2,13,8';
+  motherIn.placeholder = ph; fatherIn.placeholder = ph;
+  computeAverage();
+});
+</script>
+</body>
+</html>
