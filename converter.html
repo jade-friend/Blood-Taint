@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Base Converter – Blood Taint Calculator</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header>
+  <div class="title-eyebrow">Vigesimal Arithmetic Engine</div>
+  <h1>BLOOD TAINT CALCULATOR</h1>
+  <div class="subtitle">BASE&nbsp;20&nbsp;·&nbsp;CONVERSION&nbsp;&amp;&nbsp;AVERAGING</div>
+</header>
+
+<main>
+
+  <a href="index.html" class="back-btn">← Back</a>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-num">I</span>
+      <span class="card-title">Base Converter</span>
+    </div>
+    <div class="card-body">
+      <div class="options-row">
+        <div class="field-col">
+          <label>Decimal Places</label>
+          <select id="dp">
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3" selected>3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="8">8</option>
+            <option value="10">10</option>
+          </select>
+        </div>
+        <div class="field-col">
+          <label>Base-20 Input Format</label>
+          <select id="inputNotation">
+            <option value="compact">Compact (2D8)</option>
+            <option value="csv">CSV (2,13,8)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field-col">
+          <label>Base 20</label>
+          <input type="text" id="b20in" placeholder="e.g. 2D8 or 2D8.A3" autocomplete="off" spellcheck="false">
+          <div class="hint" id="b20hint"></div>
+        </div>
+        <button class="arrow-btn" id="swapBtn" title="Swap">&#8644;</button>
+        <div class="field-col">
+          <label>Base 10</label>
+          <input type="text" id="b10in" placeholder="e.g. 1068 or 0.65" autocomplete="off" spellcheck="false">
+          <div class="hint" id="b10hint"></div>
+        </div>
+      </div>
+
+      <div class="result-grid">
+        <div class="result-box">
+          <div class="result-label">Compact notation</div>
+          <div class="result-value" id="outCompact">—</div>
+        </div>
+        <div class="result-box">
+          <div class="result-label">CSV notation</div>
+          <div class="result-value" id="outCsv">—</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;">
+        <div class="result-box">
+          <div class="result-label">Base 10 (decimal)</div>
+          <div class="result-value" id="outDec">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>BLOOD TAINT CALCULATOR &nbsp;·&nbsp; VIGESIMAL ENGINE &nbsp;·&nbsp; BASE&nbsp;20</footer>
+
+<script src="assets/script.js" defer></script>
+</body>
+</html>
