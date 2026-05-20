@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Blood Calculus - Blood Taint Calculator</title>
+<title>Blood Calculus – Blood Taint Calculator</title>
 <link rel="stylesheet" href="assets/style.css">
+<script src="assets/script.js" defer></script>
 </head>
 <body>
 
@@ -25,9 +26,10 @@
   <div class="card">
     <div class="card-header">
       <span class="card-num">II</span>
-      <span class="card-title">Ancestral Average</span>
+      <span class="card-title">Blood Calculus</span>
     </div>
     <div class="card-body">
+
       <div class="options-row">
         <div class="field-col">
           <label>Decimal Places</label>
@@ -59,24 +61,25 @@
         </div>
       </div>
 
+      <p class="formula-note">Fill any two fields — the third is calculated automatically.</p>
+
       <div class="trio-grid">
         <div class="field-col">
-          <div class="parent-label">MOTHER</div>
+          <div class="parent-label" id="motherLabel">MOTHER</div>
           <input type="text" id="motherIn" placeholder="e.g. 2D8" autocomplete="off" spellcheck="false">
           <div class="hint" id="motherHint"></div>
         </div>
         <div class="trio-eq">+</div>
         <div class="field-col">
-          <div class="parent-label">FATHER</div>
+          <div class="parent-label" id="fatherLabel">FATHER</div>
           <input type="text" id="fatherIn" placeholder="e.g. 1J4" autocomplete="off" spellcheck="false">
           <div class="hint" id="fatherHint"></div>
         </div>
         <div class="trio-eq">÷2&nbsp;=</div>
         <div class="field-col">
-          <div class="parent-label child-label">CHILD</div>
-          <div class="result-box" style="padding:10px 12px; min-height:48px;">
-            <div class="result-value" id="childInline" style="font-size:22px;">-</div>
-          </div>
+          <div class="parent-label child-label" id="childLabel">CHILD</div>
+          <input type="text" id="childIn" placeholder="e.g. 2C6" autocomplete="off" spellcheck="false">
+          <div class="hint" id="childHint"></div>
         </div>
       </div>
 
@@ -84,30 +87,31 @@
 
       <div class="result-grid">
         <div class="result-box">
-          <div class="result-label">Child - Compact</div>
-          <div class="result-value" id="childCompact">-</div>
+          <div class="result-label">Child – Compact</div>
+          <div class="result-value" id="childCompact">—</div>
         </div>
         <div class="result-box">
-          <div class="result-label">Child - CSV</div>
-          <div class="result-value" id="childCsv">-</div>
+          <div class="result-label">Child – CSV</div>
+          <div class="result-value" id="childCsv">—</div>
         </div>
       </div>
       <div style="margin-top:12px;">
         <div class="result-box">
           <div class="result-label">Child – Base 10</div>
-          <div class="result-value" id="childDec">-</div>
+          <div class="result-value" id="childDec">—</div>
         </div>
       </div>
       <div style="margin-top:12px; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
         <div class="result-box">
           <div class="result-label">Mother – Base 10</div>
-          <div class="result-value" style="font-size:18px;" id="motherDec10">-</div>
+          <div class="result-value" style="font-size:18px;" id="motherDec10">—</div>
         </div>
         <div class="result-box">
           <div class="result-label">Father – Base 10</div>
           <div class="result-value" style="font-size:18px;" id="fatherDec10">—</div>
         </div>
       </div>
+
     </div>
   </div>
 
@@ -115,6 +119,5 @@
 
 <footer>BLOOD TAINT CALCULATOR &nbsp;·&nbsp; VIGESIMAL ENGINE &nbsp;·&nbsp; BASE&nbsp;20</footer>
 
-<script src="assets/script.js" defer></script>
 </body>
 </html>
